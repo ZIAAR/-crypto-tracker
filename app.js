@@ -87,3 +87,36 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const TrendingTokens = () => {
+    const [tokens, setTokens] = useState([]);
+
+    useEffect(() => {
+        const fetchTrendingTokens = async () => {
+            try {
+                const response = await axios.get('http://localhost:3000/trending-tokens');
+                setTokens(response.data);
+            } catch (error) {
+                console.error('Failed to fetch tokens:', error);
+            }
+        };
+
+        fetchTrendingTokens();
+    }, []);
+
+    return (
+        <div>
+            <h1>Trending Coins</h1>
+            <ul>
+                {tokens.map((token, index) => (
+                    <li key={index}>{token.name} - {token.symbol}</li>
+                ))}
+            </ul>
+        </div>
+    );
+};
+
+export default TrendingTokens;
