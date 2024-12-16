@@ -1,14 +1,14 @@
+/* style.css */
 body { 
     font-family: Arial, sans-serif;
     line-height: 1.6;
-    background-color: #ffffff;
-    color: #333;
+    background-color: #f4f4f4;
     margin: 0;
     padding: 0;
 }
 
 header {
-    background: #007BFF;
+    background: #007bff;
     color: #fff;
     padding: 20px;
     text-align: center;
@@ -24,9 +24,11 @@ main {
 }
 
 #crypto-list li {
-    background: #f4f4f4;
+    background: #fff;
     margin-bottom: 10px;
-    padding: 10px;
+    padding: 15px;
     border-radius: 5px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
 }
