@@ -20,10 +20,11 @@ app.use(cors());
 const fetchCryptoData = async () => {
     try {
         const response = await axios.get(coinGeckoApiUrl);
+        console.log('CoinGecko Data:', response.data); // Log CoinGecko response
         return response.data;
     } catch (error) {
         console.error('Error fetching CoinGecko cryptocurrency data:', error);
-        return [];
+        return []; // Return empty array if fetch fails
     }
 };
 
@@ -44,6 +45,7 @@ const getAuthToken = async (wallet, privateKey) => {
 
     try {
         const response = await axios.post(authUrl, payload);
+        console.log('RugCheck Auth Token:', response.data.token); // Log auth token
         return response.data.token;
     } catch (error) {
         console.error('Failed to get auth token:', error);
@@ -60,6 +62,7 @@ const fetchTrendingTokens = async (authToken) => {
 
     try {
         const response = await axios.get(`${BASE_URL}/stats/trending`, { headers });
+        console.log('Trending Tokens:', response.data); // Log trending tokens response
         return response.data.data || [];
     } catch (error) {
         console.error('Failed to fetch trending tokens:', error);
@@ -73,7 +76,7 @@ app.get('/data', async (req, res) => {
         const [cryptoData, authToken, trendingTokens] = await Promise.all([
             fetchCryptoData(),
             getAuthToken(YOUR_WALLET, YOUR_PRIVATE_KEY),
-            fetchTrendingTokens(authToken)
+            fetchTrendingTokens(authToken),
         ]);
 
         if (!authToken) {
@@ -108,6 +111,7 @@ const DataDisplay = () => {
                 setTrendingTokens(trendingTokens);
             } catch (error) {
                 console.error('Failed to fetch data:', error);
+                alert('An error occurred while fetching data. Please try again.');
             }
         };
 
