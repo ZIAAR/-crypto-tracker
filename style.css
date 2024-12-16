@@ -1,24 +1,21 @@
-/* Adjusting styles for a classic, elegant feel */
-body {
-    font-family: 'Times New Roman', Times, serif; /* Classic serif font */
-    background-color: #f4f4f4;
-    color: #333;
+body { 
+    font-family: Arial, sans-serif;
     line-height: 1.6;
+    background-color: #ffffff;
+    color: #333;
     margin: 0;
     padding: 0;
 }
 
 header {
-    background-color: #333;
+    background: #007BFF;
     color: #fff;
-    text-align: center;
     padding: 20px;
-    border-bottom: 2px solid #ddd;
+    text-align: center;
 }
 
 main {
     padding: 20px;
-    background-color: #fff;
 }
 
 #crypto-list ul {
@@ -27,42 +24,9 @@ main {
 }
 
 #crypto-list li {
-    background: #fff;
+    background: #f4f4f4;
     margin-bottom: 10px;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: 1px solid #ddd;
-}
-
-#crypto-list li strong {
-    font-size: 1.2rem;
-    color: #333;
-}
-
-#crypto-list li p {
-    margin: 5px 0;
-    color: #555;
-}
-
-button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-input {
     padding: 10px;
-    border: 1px solid #ddd;
     border-radius: 5px;
-    width: 100%;
-    margin-bottom: 15px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
