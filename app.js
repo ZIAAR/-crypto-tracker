@@ -1,3 +1,4 @@
+// Required Modules
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
@@ -7,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 // CoinGecko API Setup
 const coinGeckoApiUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1';
-const CG_API_KEY = 'CG-QjrwWo471k8awTn9V3UQ5e96'; // Your CoinGecko API key
+const coinGeckoApiKey = 'CG-QjrwWo471k8awTn9V3UQ5e96'; // Replace with your CoinGecko API key
 
 // Enable CORS
 app.use(cors());
@@ -17,8 +18,8 @@ const fetchCryptoData = async () => {
     try {
         const response = await axios.get(coinGeckoApiUrl, {
             headers: {
-                'Authorization': `Bearer ${CG_API_KEY}`,
-            },
+                'Authorization': `Bearer ${coinGeckoApiKey}`
+            }
         });
         return response.data;
     } catch (error) {
@@ -27,14 +28,14 @@ const fetchCryptoData = async () => {
     }
 };
 
-// Express route to fetch crypto data
-app.get('/data', async (req, res) => {
+// Express route to fetch data
+app.get('/crypto-data', async (req, res) => {
     try {
         const cryptoData = await fetchCryptoData();
         res.json({ cryptoData });
     } catch (error) {
         console.error('Error fetching crypto data:', error);
-        res.status(500).send('An error occurred while fetching data.');
+        res.status(500).send('An error occurred while fetching crypto data.');
     }
 });
 
@@ -42,3 +43,27 @@ app.get('/data', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+document.addEventListener('DOMContentLoaded', () => {
+    const cryptoList = document.getElementById('coin-data');
+
+    const fetchCryptoData = async () => {
+        try {
+            const response = await axios.get('http://localhost:3000/crypto-data');
+            const { cryptoData } = response.data;
+
+            cryptoData.forEach(coin => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <strong>${coin.name}</strong> (${coin.symbol.toUpperCase()}): $${coin.current_price.toFixed(2)} 
+                    - Market Cap: $${coin.market_cap.toLocaleString()}
+                `;
+                cryptoList.appendChild(listItem);
+            });
+        } catch (error) {
+            console.error('Failed to fetch crypto data:', error);
+        }
+    };
+
+    fetchCryptoData();
+});
+
