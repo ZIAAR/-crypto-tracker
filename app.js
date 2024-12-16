@@ -7,6 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 // CoinGecko API Setup
 const coinGeckoApiUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1';
+const CG_API_KEY = 'CG-QjrwWo471k8awTn9V3UQ5e96'; // Your CoinGecko API key
 
 // Enable CORS
 app.use(cors());
@@ -14,7 +15,11 @@ app.use(cors());
 // Fetch CoinGecko data
 const fetchCryptoData = async () => {
     try {
-        const response = await axios.get(coinGeckoApiUrl);
+        const response = await axios.get(coinGeckoApiUrl, {
+            headers: {
+                'Authorization': `Bearer ${CG_API_KEY}`,
+            },
+        });
         return response.data;
     } catch (error) {
         console.error('Error fetching CoinGecko cryptocurrency data:', error);
@@ -37,38 +42,3 @@ app.get('/data', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-// app.js
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-
-const CryptoTracker = () => {
-    const [cryptoData, setCryptoData] = useState([]);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get('http://localhost:3000/data');
-                setCryptoData(response.data.cryptoData);
-            } catch (error) {
-                console.error('Failed to fetch data:', error);
-            }
-        };
-
-        fetchData();
-    }, []);
-
-    return (
-        <div>
-            <h1>Crypto Data</h1>
-            <ul>
-                {cryptoData.map((coin, index) => (
-                    <li key={index}>
-                        <strong>{coin.name}</strong> ({coin.symbol.toUpperCase()}): ${coin.current_price.toFixed(2)} - Market Cap: ${coin.market_cap.toLocaleString()}
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
-};
-
-export default CryptoTracker;
