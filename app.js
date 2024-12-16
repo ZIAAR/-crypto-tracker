@@ -1,39 +1,33 @@
-const apiKey = 'YOUR_COIN_GECKO_API_KEY';  // Replace with your API key
-const apiUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1';
-
-async function fetchCryptoData() {
-    try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        displayCryptoData(data);
-    } catch (error) {
-        console.error('Error fetching cryptocurrency data:', error);
-    }
-}
-
-function displayCryptoData(cryptoData) {
-    const cryptoList = document.getElementById('coin-data');
-    cryptoData.forEach(coin => {
-        const listItem = document.createElement('li');
-        listItem.innerHTML = `
-            <strong>${coin.name}</strong> (${coin.symbol.toUpperCase()})
-            <p>Price: $${coin.current_price.toFixed(2)}</p>
-            <p>Market Cap: $${coin.market_cap.toLocaleString()}</p>
-        `;
-        cryptoList.appendChild(listItem);
-    });
-}
-
-fetchCryptoData();
-
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors');
+
 const app = express();
+const PORT = process.env.PORT || 3000;
 
+// CoinGecko API Setup
+const coinGeckoApiUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1';
+
+// RugCheck API Setup
 const BASE_URL = 'https://api.rugcheck.xyz/v1';
-const YOUR_WALLET = 'your_solana_wallet_address';
-const YOUR_PRIVATE_KEY = 'your_private_key';
+const YOUR_WALLET = 'your_solana_wallet_address'; // Replace with your wallet
+const YOUR_PRIVATE_KEY = 'your_private_key'; // Replace with your private key
 
+// Enable CORS
+app.use(cors());
+
+// Fetch CoinGecko data
+const fetchCryptoData = async () => {
+    try {
+        const response = await axios.get(coinGeckoApiUrl);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching CoinGecko cryptocurrency data:', error);
+        return [];
+    }
+};
+
+// Authenticate with RugCheck API and get auth token
 const getAuthToken = async (wallet, privateKey) => {
     const authUrl = `${BASE_URL}/auth/login/solana`;
     const payload = {
@@ -47,7 +41,7 @@ const getAuthToken = async (wallet, privateKey) => {
         },
         wallet: wallet,
     };
-    
+
     try {
         const response = await axios.post(authUrl, payload);
         return response.data.token;
@@ -57,12 +51,13 @@ const getAuthToken = async (wallet, privateKey) => {
     }
 };
 
+// Fetch trending tokens from RugCheck API
 const fetchTrendingTokens = async (authToken) => {
     const headers = {
         Authorization: `Bearer ${authToken}`,
         'Content-Type': 'application/json',
     };
-    
+
     try {
         const response = await axios.get(`${BASE_URL}/stats/trending`, { headers });
         return response.data.data || [];
@@ -72,51 +67,74 @@ const fetchTrendingTokens = async (authToken) => {
     }
 };
 
-app.get('/trending-tokens', async (req, res) => {
-    const authToken = await getAuthToken(YOUR_WALLET, YOUR_PRIVATE_KEY);
-    if (!authToken) {
-        res.status(500).send('Failed to authenticate.');
-        return;
-    }
+// Express route to fetch both data
+app.get('/data', async (req, res) => {
+    try {
+        const [cryptoData, authToken, trendingTokens] = await Promise.all([
+            fetchCryptoData(),
+            getAuthToken(YOUR_WALLET, YOUR_PRIVATE_KEY),
+            fetchTrendingTokens(authToken)
+        ]);
 
-    const trendingTokens = await fetchTrendingTokens(authToken);
-    res.json(trendingTokens);
+        if (!authToken) {
+            return res.status(500).send('Failed to authenticate with RugCheck.');
+        }
+
+        res.json({ cryptoData, trendingTokens });
+    } catch (error) {
+        console.error('Error fetching combined data:', error);
+        res.status(500).send('An error occurred while fetching data.');
+    }
 });
 
-const PORT = process.env.PORT || 3000;
+// Start server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const TrendingTokens = () => {
-    const [tokens, setTokens] = useState([]);
+const DataDisplay = () => {
+    const [cryptoData, setCryptoData] = useState([]);
+    const [trendingTokens, setTrendingTokens] = useState([]);
 
     useEffect(() => {
-        const fetchTrendingTokens = async () => {
+        const fetchData = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/trending-tokens');
-                setTokens(response.data);
+                const response = await axios.get('http://localhost:3000/data');
+                const { cryptoData, trendingTokens } = response.data;
+
+                setCryptoData(cryptoData);
+                setTrendingTokens(trendingTokens);
             } catch (error) {
-                console.error('Failed to fetch tokens:', error);
+                console.error('Failed to fetch data:', error);
             }
         };
 
-        fetchTrendingTokens();
+        fetchData();
     }, []);
 
     return (
         <div>
-            <h1>Trending Coins</h1>
+            <h1>Crypto Data</h1>
             <ul>
-                {tokens.map((token, index) => (
-                    <li key={index}>{token.name} - {token.symbol}</li>
+                {cryptoData.map((coin, index) => (
+                    <li key={index}>
+                        <strong>{coin.name}</strong> ({coin.symbol.toUpperCase()}): ${coin.current_price.toFixed(2)} - Market Cap: ${coin.market_cap.toLocaleString()}
+                    </li>
+                ))}
+            </ul>
+
+            <h1>Trending Tokens</h1>
+            <ul>
+                {trendingTokens.map((token, index) => (
+                    <li key={index}>
+                        {token.name} - {token.symbol}
+                    </li>
                 ))}
             </ul>
         </div>
     );
 };
 
-export default TrendingTokens;
+export default DataDisplay;
